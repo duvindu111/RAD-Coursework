@@ -1,0 +1,25 @@
+# Node.js dependencies
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files (for storing secrets, API keys, etc.)
+.env
+
+# Local database files
+*.sqlite
+
+# IDE and editor configurations
+.vscode/
+.idea/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Build and temporary files
+/dist/
+/build/
