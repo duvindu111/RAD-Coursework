@@ -1,5 +1,7 @@
 import {createContext, ReactNode, useContext, useEffect, useState} from "react";
 import {jwtDecode} from "jwt-decode";
+import axios from "axios";
+import {JwtPayload} from "../types/JwtPayload.ts";
 
 interface AuthContextType {
     isAuthenticated: boolean;
@@ -11,11 +13,6 @@ interface AuthContextType {
 
 interface AuthProviderProps {
     children: ReactNode;
-}
-
-interface JwtPayload {
-    id: string;
-    role: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -36,6 +33,7 @@ export const AuthProvider = ({children}: AuthProviderProps) => {
     const register = (token: string) => {
         localStorage.setItem('token', token);
         setIsAuthenticated(true);
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     };
 
     const login = (token: string) => {
@@ -43,6 +41,7 @@ export const AuthProvider = ({children}: AuthProviderProps) => {
         const decoded = jwtDecode<JwtPayload>(token);
         setIsAuthenticated(true);
         setRole(decoded.role);
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     };
 
     const logout = () => {

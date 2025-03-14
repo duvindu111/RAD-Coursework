@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { UserPlus } from 'lucide-react';
 import {useNavigate} from "react-router-dom";
 import {useAuth} from "../../context/AuthContext.tsx";
+import axios, {AxiosError} from 'axios';
+import {ErrorResponse} from "../../types/ErrorResponse.ts";
 
 export default function Register() {
     const [email, setEmail] = useState('');
@@ -23,18 +25,21 @@ export default function Register() {
             return;
         }
 
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/register`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password }),
-        });
+        try {
+            const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/auth/register`, {
+                email, password
+            });
 
-        const data = await response.json();
-        if (response.ok) {
+            const data = response.data;
             register(data.token);
             navigate('/');
-        } else {
-            alert(data.message);
+        } catch (error: unknown) {
+            const axiosError = error as AxiosError<ErrorResponse>;
+            if (axiosError.response) {
+                alert(axiosError.response.data.message);
+            } else {
+                alert('Something went wrong!');
+            }
         }
     };
 

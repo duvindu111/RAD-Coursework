@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { LogIn } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
 import {useAuth} from "../../context/AuthContext.tsx";
+import axios, {AxiosError} from 'axios';
+import {ErrorResponse} from "../../types/ErrorResponse.ts";
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -12,18 +14,22 @@ export default function Login() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password }),
-        });
+        try {
+            const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
+                email,
+                password
+            });
 
-        const data = await response.json();
-        if (response.ok) {
+            const data = response.data;
             login(data.token);
             navigate('/');
-        } else {
-            alert(data.message);
+        } catch (error: unknown) {
+            const axiosError = error as AxiosError<ErrorResponse>;
+            if (axiosError.response) {
+                alert(axiosError.response.data.message);
+            } else {
+                alert('Something went wrong!');
+            }
         }
     };
 

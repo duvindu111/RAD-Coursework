@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {Package, Users, ShoppingCart, Plus, Pencil, Trash2, DollarSign} from 'lucide-react';
-import { products, orders } from '../data';
+import { orders } from '../data';
 import {useAuth} from "../../context/AuthContext.tsx";
-
+import {Product} from "../../types/Product.ts";
+import axios, {AxiosError} from 'axios';
+import {ErrorResponse} from "../../types/ErrorResponse.ts";
 export default function AdminDashboard() {
     const {isAuthenticated, role} = useAuth();
     const [activeTab, setActiveTab] = useState<'orders' | 'products'>('orders');
     const [editingProduct, setEditingProduct] = useState<string | null>(null);
+    const [products, setProducts] = useState([]);
     const [formData, setFormData] = useState({
         name: '',
         description: '',
@@ -16,16 +19,19 @@ export default function AdminDashboard() {
         image: ''
     });
 
-    if (!isAuthenticated || role !== 'admin') {
-        return (
-            <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-gray-50">
-                <div className="text-center">
-                    <h2 className="text-2xl font-semibold text-gray-900">Access Denied</h2>
-                    <p className="mt-2 text-gray-600">You need admin privileges to view this page.</p>
-                </div>
-            </div>
-        );
-    }
+    useEffect(() => {
+        fetchProducts();
+    }, []);
+
+    const fetchProducts = async () => {
+        try {
+            const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/product/all`);
+            setProducts(response.data);
+        } catch (error: unknown) {
+            console.log('Error while loading products: ' , error);
+            alert('Something went wrong while loading products!');
+        }
+    };
 
     const stats = [
         {
@@ -59,18 +65,18 @@ export default function AdminDashboard() {
     ];
 
     const handleEditProduct = (productId: string) => {
-        const product = products.find(p => p.id === productId);
-        if (product) {
-            setEditingProduct(productId);
-            setFormData({
-                name: product.name,
-                description: product.description,
-                price: product.price.toString(),
-                category: product.category,
-                stock: product.stock.toString(),
-                image: product.image
-            });
-        }
+        // const product = products.find(p => p.id === productId);
+        // if (product) {
+        //     setEditingProduct(productId);
+        //     setFormData({
+        //         name: product.name,
+        //         description: product.description,
+        //         price: product.price.toString(),
+        //         category: product.category,
+        //         stock: product.stock.toString(),
+        //         image: product.image
+        //     });
+        // }
     };
 
     const handleFormSubmit = async (e: React.FormEvent) => {
@@ -92,13 +98,14 @@ export default function AdminDashboard() {
         formDataToSend.append('category', formData.category);
         formDataToSend.append('image', formData.image);
 
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/product/add`, {
-            method: 'POST',
-            body: formDataToSend,
-        });
-        const data = await response.json();
-        alert(data.message);
-        if (response.ok) {
+        try {
+            const response = await axios.post(
+                `${import.meta.env.VITE_API_BASE_URL}/product/add`,
+                formDataToSend
+            );
+
+            alert(response.data.message);
+
             setEditingProduct(null);
             setFormData({
                 name: '',
@@ -108,6 +115,14 @@ export default function AdminDashboard() {
                 stock: '',
                 image: ''
             });
+            fetchProducts();
+        } catch (error: unknown) {
+            const axiosError = error as AxiosError<ErrorResponse>;
+            if (axiosError.response) {
+                alert(axiosError.response.data.message);
+            } else {
+                alert('Something went wrong!');
+            }
         }
     }
 
@@ -117,6 +132,17 @@ export default function AdminDashboard() {
             [e.target.name]: e.target.value
         });
     };
+
+    if (!isAuthenticated || role !== 'admin') {
+        return (
+            <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-gray-50">
+                <div className="text-center">
+                    <h2 className="text-2xl font-semibold text-gray-900">Access Denied</h2>
+                    <p className="mt-2 text-gray-600">You need admin privileges to view this page.</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -372,14 +398,14 @@ export default function AdminDashboard() {
 
                             <div className="bg-white shadow overflow-hidden sm:rounded-md">
                                 <ul className="divide-y divide-gray-200">
-                                    {products.map((product) => (
-                                        <li key={product.id}>
+                                    {products.map((product: Product) => (
+                                        <li key={product._id}>
                                             <div className="px-4 py-4 sm:px-6">
                                                 <div className="flex items-center">
                                                     <div className="flex-shrink-0 h-12 w-12">
                                                         <img
                                                             className="h-12 w-12 rounded-md object-cover"
-                                                            src={product.image}
+                                                            src={`${import.meta.env.VITE_BACKEND_BASE_URL}/uploads/${product.image}`}
                                                             alt={product.name}
                                                         />
                                                     </div>
