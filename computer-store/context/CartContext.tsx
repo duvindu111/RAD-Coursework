@@ -10,6 +10,8 @@ interface CartContextType {
     cart: CartItem[];
     addToCart: (productId: string, quantity: number) => void;
     removeFromCart: (productId: string) => void;
+    clearCart: () => void;
+    updateCartItemQuantity: (productId: string, quantity: number) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -63,8 +65,29 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         alert('removed from cart');
     };
 
+    const clearCart = () => {
+        setCart([]);
+
+        if (role === 'admin' || role === 'user') {
+            axios.post(`${import.meta.env.VITE_API_BASE_URL}/cart/post`, { cart: [] });
+        } else {
+            saveCartToLocalStorage([]);
+        }
+    };
+
+    const updateCartItemQuantity = (productId: string, quantity: number) => {
+        setCart(prevCart =>
+            prevCart.map(item =>
+                item.productId === productId
+                    ? {...item, quantity: Math.max(1, quantity)}
+                    : item
+            )
+        );
+    };
+
+
     return (
-        <CartContext.Provider value={{ cart, addToCart, removeFromCart }}>
+        <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart, updateCartItemQuantity }}>
             {children}
         </CartContext.Provider>
     );

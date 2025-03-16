@@ -6,7 +6,7 @@ import axios from 'axios';
 import {Product} from "../../types/Product.ts";
 
 export default function Cart() {
-    const {cart, removeFromCart} = useCart();
+    const {cart, removeFromCart, updateCartItemQuantity} = useCart();
     const [products, setProducts] = useState<Product[]>([]);
     const navigate = useNavigate();
 
@@ -37,6 +37,12 @@ export default function Cart() {
             <h1 className="text-3xl font-bold text-gray-900 mb-8">Shopping Cart</h1>
 
             <div className="bg-white rounded-lg shadow overflow-hidden">
+                {products.length === 0 ? (
+                        <div className="p-6 text-center text-gray-900">
+                            Your cart is empty
+                        </div>
+                    ) :
+                    <div>
                 <ul className="divide-y divide-gray-200">
                     {products.map(product => (
                         <li key={product._id} className="p-6 flex items-center">
@@ -49,41 +55,53 @@ export default function Cart() {
                                 <h3 className="text-lg font-semibold text-gray-900">
                                     {product.name}
                                 </h3>
-                                <p className="text-gray-600 mt-1">{product.description}</p>
-                                <div className="mt-2 flex items-center justify-between">
+                                <div className="mt-1 flex items-center justify-between">
                                     <div>
                                         <span className="text-gray-600">Quantity: </span>
-                                        <span className="font-semibold">{getQuantity(product._id)}</span>
+                                        <div className="flex items-center gap-3">
+                                            <button
+                                                onClick={() => updateCartItemQuantity(product._id, getQuantity(product._id) - 1)}
+                                                className="bg-gray-200 rounded-full w-6 cursor-pointer">-
+                                            </button>
+                                            <span className="text-lg font-semibold">{getQuantity(product._id)}</span>
+                                            <button
+                                                onClick={() => updateCartItemQuantity(product._id, getQuantity(product._id) + 1)}
+                                                className="bg-gray-200 rounded-full w-6 cursor-pointer">+
+                                            </button>
+                                        </div>
+
                                     </div>
-                                    <span className="font-semibold">
-                    ${(product.price * getQuantity(product._id)).toFixed(2)}
-                  </span>
                                 </div>
                             </div>
-                            <button
-                                onClick={() => removeCartItem(product._id)}
-                                className="ml-6 text-red-600 hover:text-red-800"
-                            >
-                                <Trash2 className="h-5 w-5"/>
-                            </button>
+                            <div className="flex">
+                                      <span className="font-semibold">
+                    {(product.price * getQuantity(product._id)).toFixed(2)} LKR
+                  </span>
+                                <button
+                                    onClick={() => removeCartItem(product._id)}
+                                    className="ml-6 text-red-600 hover:text-red-800"
+                                >
+                                    <Trash2 className="h-5 w-5"/>
+                                </button>
+                            </div>
                         </li>
                     ))}
                 </ul>
-
                 <div className="p-6 bg-gray-50 border-t border-gray-200">
                     <div className="flex items-center justify-between">
                         <span className="text-lg font-semibold text-gray-900">Total</span>
                         <span className="text-2xl font-bold text-gray-900">
-              ${ products.reduce((acc, product) => acc + product.price * getQuantity(product._id), 0).toFixed(2) }
+              {products.reduce((acc, product) => acc + product.price * getQuantity(product._id), 0).toFixed(2)} LKR
             </span>
                     </div>
                     <button
                         onClick={() => navigate('/checkout')}
-                        className="mt-6 w-full bg-indigo-600 text-white py-3 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        className="mt-6 w-full bg-[var(--primary-color)] text-white py-3 px-4 rounded-md hover:bg-[var(--secondary-color)] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                     >
                         Proceed to Checkout
                     </button>
                 </div>
+                    </div>}
             </div>
         </div>
     );

@@ -31,20 +31,20 @@ export default function Home() {
                         <div className="p-4">
                             <h3 className="text-lg font-semibold text-gray-900">{product.name}</h3>
                             <p className="text-sm text-gray-600 mt-1">{product.description}</p>
-                            <div className="mt-4 flex items-center justify-between">
+                            <div className="mt-4 flex items-center justify-between mb-2">
                 <span className="text-xl font-bold text-gray-900">
                   ${product.price.toFixed(2)}
                 </span>
                                 <button
                                     onClick={() => addToCart(product._id, 1)}
-                                    className="flex items-center space-x-1 bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
+                                    className="flex items-center space-x-1 bg-[var(--primary-color)] text-white px-4 py-2 rounded-md hover:bg-[var(--secondary-color)]"
                                 >
                                     <span>Add to Cart</span>
                                 </button>
                             </div>
-                            <p className="text-sm text-gray-500 mt-2">
-                                {product.stock} in stock
-                            </p>
+                            {/*<p className="text-sm text-gray-500 mt-2">*/}
+                            {/*    {product.stock} in stock*/}
+                            {/*</p>*/}
                         </div>
                     </div>
                 ))}

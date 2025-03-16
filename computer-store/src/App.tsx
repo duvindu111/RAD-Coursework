@@ -12,6 +12,8 @@ import Cart from "./pages/Cart.tsx";
 import axios from "axios";
 import Checkout from "./pages/Checkout.tsx";
 import Payment from "./pages/Payment.tsx";
+import Success from "./pages/Success.tsx";
+import OrderHistory from "./pages/OrderHistory.tsx";
 
 function App() {
     const token = localStorage.getItem('token');
@@ -29,10 +31,11 @@ function App() {
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/payment" element={<Payment />} />
-              {/*<Route path="/orders" element={<OrderHistory />} />*/}
+              <Route path="/orders" element={<OrderHistory />} />
 
               <Route path="/admin" element={<AdminDashboard/>}/>
-
+              <Route path="/success" element={<Success/>}/>
+              <Route path="/cancel" element={<Cart/>}/>
           </Routes>
       </Router>
   )

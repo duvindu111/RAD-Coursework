@@ -1,36 +1,70 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, {useEffect, useState} from 'react';
+import {useLocation, useNavigate} from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
-import { CreditCard, Lock } from 'lucide-react';
+import { CreditCard, Lock, CircleCheck } from 'lucide-react';
+import axios from "axios";
+import {CartItem} from "../../types/CartItem.ts";
 
 export default function Payment() {
-    // const { total, clearCart } = useCart();
+    const { state } = useLocation();
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(false);
+    const [cartWithPrices, setCartWithPrices] = useState<CartItem[]>([]);
+    const { clearCart } = useCart();
+
+    const { cart, total, formData } = state || {};
+
+    useEffect(() => {
+        fetchCartProducts();
+    }, [cart]);
+
+    const fetchCartProducts = async () => {
+        const productIds = cart.map((item: CartItem) => item.productId);
+        const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/product/get-by-ids`, {productIds});
+
+        const cartWithPricesTemp = cart.map((item: CartItem) => {
+            const priceInfo = response.data.find((p: any) => p._id === item.productId);
+            return {
+                ...item,
+                price: priceInfo ? priceInfo.price : 0,
+            };
+        });
+        setCartWithPrices(cartWithPricesTemp);
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
 
-        // Simulate payment processing
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        try {
+            const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/order/place`, {
+                cart: cartWithPrices,
+                total,
+                shippingDetails: formData
+            });
 
-        // clearCart();
-        navigate('/orders');
+            if (res.data.success) {
+                clearCart();
+                navigate('/orders');
+            } else {
+                alert('Payment Failed');
+            }
+        } catch (error) {
+            console.error('Payment Failed', error);
+            alert('Payment Failed. Please try again.');
+        }
     };
 
     return (
         <div className="mt-14 max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="bg-white rounded-lg shadow-md p-6">
                 <div className="flex items-center justify-center mb-6">
-                    <Lock className="h-8 w-8 text-indigo-600" />
+                    <CircleCheck className="h-8 w-8 text-green-500" />
                     <h2 className="text-2xl font-bold text-gray-900 ml-2">Secure Payment</h2>
                 </div>
 
                 <div className="mb-6">
                     <div className="flex items-center justify-between text-lg font-semibold mb-2">
                         <span>Total Amount:</span>
-                        {/*<span>${total.toFixed(2)}</span>*/}
+                        <span>${total.toFixed(2)}</span>
                     </div>
                     <div className="text-sm text-gray-600">
                         Your payment is encrypted and secure.
@@ -84,16 +118,13 @@ export default function Payment() {
 
                     <button
                         type="submit"
-                        disabled={loading}
-                        className="w-full flex items-center justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full flex items-center justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[var(--primary-color)] hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {loading ? (
-                            <span>Processing...</span>
-                        ) : (
+
                             <span>
-                                {/*Pay ${total.toFixed(2)}*/}
+                                Pay ${total.toFixed(2)}
                             </span>
-                        )}
+
                     </button>
                 </form>
 

@@ -52,7 +52,13 @@ export default function Checkout() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        navigate('/payment');
+        navigate('/payment', {
+            state: {
+                cart: cart,
+                total: total,
+                formData: formData
+            }
+        });
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -169,7 +175,7 @@ export default function Checkout() {
 
                     <button
                         type="submit"
-                        className="w-full flex items-center justify-center space-x-2 bg-indigo-600 text-white py-3 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        className="w-full flex items-center justify-center space-x-2 bg-[var(--primary-color)] text-white py-3 px-4 rounded-md hover:bg-[var(--secondary-color)] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                     >
                         <CreditCard className="h-5 w-5" />
                         <span>Proceed to Payment</span>

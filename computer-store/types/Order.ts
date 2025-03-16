@@ -1,12 +1,21 @@
 export interface Order {
-    id: string;
+    _id: string;
     userId: string;
-    items: Array<{
+    cart: Array<{
         productId: string;
         quantity: number;
         price: number;
     }>;
     total: number;
-    status: 'pending' | 'completed' | 'cancelled';
-    date: string;
+    shippingDetails: {
+        name: string;
+        email: string;
+        address: string;
+        city: string;
+        country: string;
+        zipCode: string;
+    },
+    orderStatus: string;
+    createdAt: string;
+    orderId: string
 }

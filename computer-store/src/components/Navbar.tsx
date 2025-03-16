@@ -1,10 +1,12 @@
 import {Link, useNavigate} from "react-router-dom";
 import {Monitor, ShoppingCart} from 'lucide-react';
 import {useAuth} from "../../context/AuthContext.tsx";
+import {useCart} from "../../context/CartContext.tsx";
 
 export function Navbar() {
     const {isAuthenticated, role, logout} = useAuth();
     const navigate = useNavigate();
+    const {cart} = useCart();
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -13,7 +15,7 @@ export function Navbar() {
     };
 
     return (
-        <nav className="bg-indigo-600 text-white fixed top-0 left-0 w-[100vw]">
+        <nav className="bg-[var(--primary-color)] text-white fixed top-0 left-0 w-[100vw]">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                     <Link to="/" className="flex items-center space-x-2">
@@ -24,12 +26,12 @@ export function Navbar() {
                     <div className="flex items-center space-x-4">
                         <Link to="/cart" className="relative">
                             <ShoppingCart className="h-6 w-6 text-white"/>
-                            {/*            {items.length > 0 && (*/}
-                            {/*                <span*/}
-                            {/*                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">*/}
-                            {/*  {items.length}*/}
-                            {/*</span>*/}
-                            {/*            )}*/}
+                            {cart.length > 0 && (
+                                <span
+                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                              {cart.length}
+                            </span>
+                            )}
                         </Link>
 
                         {!isAuthenticated ? (
